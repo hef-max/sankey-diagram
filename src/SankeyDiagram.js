@@ -16,8 +16,6 @@ const SankeyDiagram = () => {
     { label: 'Non-Forested Natural Vegetation', color: '#B7E0FF' },
   ];
 
-
-
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -46,13 +44,13 @@ const SankeyDiagram = () => {
 
   useEffect(() => {
     if (!data) return;
-    
+
     const colors = {
-        agri: '#FF6600', // Warna hijau untuk padang
-        forest: '#347928', // Warna biru untuk hutan
-        nonforest: '#B7E0FF', // Warna oranye untuk lahan kering
-        grass: '#FCCD2A',
-      };
+      agri: '#FF6600', // Warna untuk pertanian
+      forest: '#347928', // Warna untuk hutan
+      nonforest: '#B7E0FF', // Warna untuk lahan kering
+      grass: '#FCCD2A', // Warna untuk padang
+    };
 
     const margin = { top: 10, right: 10, bottom: 10, left: 10 },
       width = 960 - margin.left - margin.right,
@@ -82,7 +80,15 @@ const SankeyDiagram = () => {
     sankeyGenerator(graph);
 
     const getGradID = (d) => `linkGrad-${d.source.name}-${d.target.name}`;
-    const nodeColor = (d) => colors[d.name.toLowerCase().replace(/ .*/, '')];
+    
+    const nodeColor = (d) => {
+      const name = d.name.toLowerCase(); // Convert to lowercase
+      if (name.startsWith('agri')) return colors.agri; // Agriculture
+      if (name.startsWith('forest')) return colors.forest; // Forest
+      if (name.startsWith('nonforest')) return colors.nonforest; // Non-forested land
+      if (name.startsWith('grass')) return colors.grass; // Grassland
+      return '#000000'; // Default color if none match
+    };
 
     const defs = svg.append('defs');
 
@@ -129,16 +135,16 @@ const SankeyDiagram = () => {
       .attr('height', (d) => d.y1 - d.y0)
       .attr('width', sankeyGenerator.nodeWidth())
       .style('fill', (d) => nodeColor(d))
-      .style('stroke', (d) => d3.rgb(d.color).darker(2))
+      .style('stroke', (d) => d3.rgb(nodeColor(d)).darker(2))
       .append('title')
-      .text((d) => `${d.name}\n${format(d.value)}`);
+      .text((d) => `${d.value}\n${format(d.name)}`);
 
     node.append('text')
       .attr('x', -6)
       .attr('y', (d) => (d.y1 - d.y0) / 2)
       .attr('dy', '.35em')
       .attr('text-anchor', 'end')
-      .text((d) => d.name)
+      .text((d) => `${formatNumber(d.value/1E6)} ${units}`)
       .filter((d) => d.x0 < width / 2)
       .attr('x', 6 + sankeyGenerator.nodeWidth())
       .attr('text-anchor', 'start');
@@ -146,31 +152,37 @@ const SankeyDiagram = () => {
 
   return (
     <div style={{
-        display: 'flex',
-        justifyContent: 'center',  // untuk memposisikan secara horizontal
-        alignItems: 'center',      // untuk memposisikan secara vertikal
-        height: '100vh'            // ketinggian kontainer akan memenuhi seluruh layar
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh',
+      padding: '20px',
+      boxSizing: 'border-box',
     }}>
       {!showDiagram && (
-        <input 
-        type="file" 
-        accept=".json" 
-        onChange={handleFileUpload} 
-        style={{
-          cursor: 'pointer',
-          padding: '10px 20px',
-          fontSize: '16px'
-        }} 
-      />
+        <input
+          type="file"
+          accept=".json"
+          onChange={handleFileUpload}
+          style={{
+            cursor: 'pointer',
+            padding: '10px 20px',
+            fontSize: '16px',
+            width: '100%',
+            maxWidth: '400px',
+            marginBottom: '20px',
+          }}
+        />
       )}
       {showDiagram && (
-        <div ref={diagramRef}>
+        <div ref={diagramRef} style={{ textAlign: 'center', margin: '20px 0' }}>
           <h3>1970 - 2020</h3>
-          <svg ref={svgRef}></svg>
+          <svg ref={svgRef} style={{ width: '100%', height: 'auto' }}></svg>
 
-          <div style={{ display: 'flex', flexDirection: 'row', marginLeft: '100px' }}>
+          <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap' }}>
             {legendItems.map((item, index) => (
-              <div key={index} style={{ display: 'flex', marginRight: '10px' }}>
+              <div key={index} style={{ display: 'flex', alignItems: 'center', margin: '5px' }}>
                 <div
                   style={{
                     width: '20px',
@@ -186,7 +198,13 @@ const SankeyDiagram = () => {
         </div>
       )}
       {showDiagram && (
-        <button onClick={saveAsImage} style={{ marginLeft: '50px', padding: '10px 15px', cursor: 'pointer', backgroundColor: '#10b981', borderRadius: '5%' }}>
+        <button onClick={saveAsImage} style={{
+          padding: '10px 15px',
+          cursor: 'pointer',
+          backgroundColor: '#10b981',
+          borderRadius: '5%',
+          marginTop: '10px',
+        }}>
           Save as Image
         </button>
       )}
