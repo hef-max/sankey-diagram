@@ -12,7 +12,6 @@ const SankeyDiagram = () => {
   const legendItems = [
     { label: 'Agriculture', color: '#FF6600' },
     { label: 'Forested Natural Vegetation', color: '#347928' },
-    { label: 'Grassland', color: '#FCCD2A' },
     { label: 'Non-Forested Natural Vegetation', color: '#B7E0FF' },
   ];
 
@@ -48,8 +47,7 @@ const SankeyDiagram = () => {
     const colors = {
       agri: '#FF6600', // Warna untuk pertanian
       forest: '#347928', // Warna untuk hutan
-      nonforest: '#B7E0FF', // Warna untuk lahan kering
-      grass: '#FCCD2A', // Warna untuk padang
+      nonforest: '#B7E0FF' // Warna untuk lahan kering
     };
 
     const margin = { top: 10, right: 10, bottom: 10, left: 10 },
@@ -57,7 +55,7 @@ const SankeyDiagram = () => {
       height = 600 - margin.top - margin.bottom;
 
     const units = 'Mha'; // Million hectares
-    const formatNumber = d3.format(',.0f');
+    const formatNumber = d3.format(',.2f');
     const format = (d) => `${formatNumber(d)} ${units}`;
 
     d3.select(svgRef.current).selectAll('*').remove();
@@ -177,7 +175,6 @@ const SankeyDiagram = () => {
       )}
       {showDiagram && (
         <div ref={diagramRef} style={{ textAlign: 'center', margin: '20px 0' }}>
-          <h3>1970 - 2020</h3>
           <svg ref={svgRef} style={{ width: '100%', height: 'auto' }}></svg>
 
           <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap' }}>
